@@ -8,7 +8,7 @@ import { ResultScreen } from './components/ResultScreen';
 import { RefineScreen } from './components/RefineScreen';
 import { SuccessScreen } from './components/SuccessScreen';
 import { SubmissionCompleteScreen } from './components/SubmissionCompleteScreen';
-import { geminiService } from './services/geminiService';
+import { apiClient } from './services/apiClient';
 
 const STORAGE_KEY = 'euiui-isso-state';
 
@@ -17,6 +17,7 @@ interface PersistedState {
   complaint: string;
   analysis: AIAnalysis | null;
   messages: ChatMessage[];
+  proposalId: string | null;
 }
 
 export default function App() {
@@ -39,6 +40,7 @@ export default function App() {
       complaint: '',
       analysis: null,
       messages: [],
+      proposalId: null,
     };
   };
 
@@ -47,6 +49,7 @@ export default function App() {
   const [complaint, setComplaint] = useState(initialState.complaint);
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(initialState.analysis);
   const [messages, setMessages] = useState<ChatMessage[]>(initialState.messages);
+  const [proposalId, setProposalId] = useState<string | null>(initialState.proposalId);
 
   useEffect(() => {
     const stateToSave: PersistedState = {
@@ -54,6 +57,7 @@ export default function App() {
       complaint,
       analysis,
       messages,
+      proposalId,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
   }, [currentScreen, complaint, analysis, messages]);
@@ -63,8 +67,14 @@ export default function App() {
     setCurrentScreen('LOADING');
     
     try {
-      const result = await geminiService.analyzeComplaint(text);
-      setAnalysis(result);
+      const result = await apiClient.startProposal(text);
+      setProposalId(result.id);
+      setAnalysis(result.analysis);
+      setMessages([{
+        id: "1",
+        role: "assistant",
+        content: result.initialQuestion,
+      }]);
       setCurrentScreen('RESULT');
     } catch (error) {
       console.error(error);
@@ -81,6 +91,7 @@ export default function App() {
     setComplaint('');
     setAnalysis(null);
     setMessages([]);
+    setProposalId(null);
     setCurrentScreen('INPUT');
     localStorage.removeItem(STORAGE_KEY);
   };
@@ -109,9 +120,10 @@ export default function App() {
           />
         )}
 
-        {currentScreen === 'REFINE' && analysis && (
+        {currentScreen === 'REFINE' && analysis && proposalId && (
           <RefineScreen 
             key="refine" 
+            proposalId={proposalId}
             analysis={analysis}
             messages={messages}
             setMessages={setMessages}

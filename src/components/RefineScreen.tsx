@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Gavel, ChevronLeft, Send, Stars, Target, Globe, Library, Wrench, Lightbulb } from "lucide-react";
 import { AIAnalysis, ChatMessage } from "../types";
-import { geminiService } from "../services/geminiService";
+import { apiClient } from "../services/apiClient";
 import { SuccessScreen } from "./SuccessScreen";
 
 interface RefineScreenProps {
+  proposalId: string;
   analysis: AIAnalysis;
   messages: ChatMessage[];
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
@@ -14,29 +15,15 @@ interface RefineScreenProps {
   onComplete: () => void;
 }
 
-export function RefineScreen({ analysis, messages, setMessages, onUpdate, onBack, onComplete }: RefineScreenProps) {
+export function RefineScreen({ proposalId, analysis, messages, setMessages, onUpdate, onBack, onComplete }: RefineScreenProps) {
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showGrowth, setShowGrowth] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const initChat = async () => {
-      if (messages.length > 0) return;
-      
-      setIsTyping(true);
-      const question = await geminiService.getRefinementQuestion(analysis, []);
-      setMessages([{
-        id: "1",
-        role: "assistant",
-        content: question,
-        round: 1,
-        topic: "구체성 보완"
-      }]);
-      setIsTyping(false);
-    };
-    initChat();
-  }, [analysis, messages.length, setMessages]);
+    // Initial message is now received from startProposal in App.tsx
+  }, []);
 
   const handleSend = async () => {
     if (!inputText.trim()) return;
@@ -48,43 +35,21 @@ export function RefineScreen({ analysis, messages, setMessages, onUpdate, onBack
     setIsTyping(true);
 
     try {
-      // 1. Calculate new score (gradual increase)
-      const jump = Math.floor(Math.random() * 8) + 7; // 7-15% increase per round
-      const newScore = Math.min(98, analysis.structuringLevel + jump);
-      
-      // 2. Simulate analysis update
-      const updatedAnalysis: AIAnalysis = {
-        ...analysis,
-        structuringLevel: newScore,
-        metrics: analysis.metrics.map(m => {
-          const inc = m.value < 90 ? Math.floor(Math.random() * 10) + 3 : 0;
-          return {
-            ...m,
-            value: Math.min(100, m.value + inc),
-            increment: inc
-          };
-        }),
-        riskOfRejection: newScore < 80,
-        diagnostic: newScore >= 85 
-          ? "제안이 매우 충실해졌습니다. 이제 실무 부서에서 검토하기에 충분한 수준입니다."
-          : "좋은 답변입니다. 다만 구체적인 실행 계획에 대해 조금 더 고민해볼 필요가 있습니다."
-      };
-
-      // 3. Get next question/feedback from Gemini
-      const aiResponse = await geminiService.getRefinementQuestion(updatedAnalysis, newMessages);
+      // 1. Get next question/feedback from Backend
+      const result = await apiClient.respondToProposal(proposalId, inputText);
       
       const assistantMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: aiResponse
+        content: result.nextMessage
       };
 
-      // 4. Update all states
+      // 2. Update all states
       setMessages(prev => [...prev, assistantMsg]);
-      onUpdate(updatedAnalysis);
+      onUpdate(result.analysis);
       setIsTyping(false);
       
-      // 5. Show progress/growth modal after a short delay
+      // 3. Show progress/growth modal after a short delay
       setTimeout(() => {
         setShowGrowth(true);
       }, 500);
@@ -272,7 +237,14 @@ export function RefineScreen({ analysis, messages, setMessages, onUpdate, onBack
               className="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none"
             >
               <button 
-                onClick={onComplete}
+                onClick={async () => {
+                  try {
+                    await apiClient.finalizeProposal(proposalId);
+                    onComplete();
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
                 className="pointer-events-auto bg-brand-orange text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl flex items-center gap-2 hover:bg-orange-600 transition-all active:scale-95 border-b-4 border-orange-800"
               >
                 <Stars size={18} />

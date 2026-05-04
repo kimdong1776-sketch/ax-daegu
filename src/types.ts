@@ -29,4 +29,5 @@ export interface ChatMessage {
   content: string;
   round?: number;
   topic?: string;
+  proposalId?: string;
 }

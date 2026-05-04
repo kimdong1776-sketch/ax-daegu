@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Gavel, HelpCircle, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+import { useState, useEffect } from "react";
+import { Gavel, HelpCircle, Sparkles, History, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { apiClient } from "../services/apiClient";
 
 interface InputScreenProps {
   onSubmit: (text: string) => void;
@@ -8,7 +9,20 @@ interface InputScreenProps {
 
 export function InputScreen({ onSubmit }: InputScreenProps) {
   const [text, setText] = useState("");
+  const [proposals, setProposals] = useState<any[]>([]);
   const quickChips = ["버스 배차", "주차 문제", "야간 교통", "보행 불편"];
+
+  useEffect(() => {
+    const fetchProposals = async () => {
+      try {
+        const data = await apiClient.getProposals();
+        setProposals(data);
+      } catch (e) {
+        console.error("Failed to fetch proposals", e);
+      }
+    };
+    fetchProposals();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -24,7 +38,7 @@ export function InputScreen({ onSubmit }: InputScreenProps) {
         </div>
       </header>
 
-      <main className="flex-1 max-w-2xl mx-auto w-full pt-28 pb-32 px-6 flex flex-col gap-12">
+      <main className="flex-1 max-w-2xl mx-auto w-full pt-28 pb-40 px-6 flex flex-col gap-12">
         <section className="flex flex-col items-center text-center gap-4">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -71,6 +85,45 @@ export function InputScreen({ onSubmit }: InputScreenProps) {
             ))}
           </div>
         </section>
+
+        {proposals.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 text-brand-navy">
+              <History size={18} />
+              <h3 className="font-black text-sm italic">시민들의 목소리</h3>
+            </div>
+            <div className="grid gap-3">
+              {proposals.map((p) => (
+                <div 
+                  key={p.id}
+                  className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col gap-2 hover:border-brand-blue/30 transition-all cursor-default"
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] font-black text-brand-blue px-2 py-0.5 bg-brand-blue/5 rounded-full border border-brand-blue/10">
+                      {p.analysis.draft.category}
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400">
+                      {new Date(p.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm font-black text-brand-navy line-clamp-1">
+                    {p.analysis.draft.problem}
+                  </p>
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="flex gap-1">
+                      {p.analysis.metrics.slice(0, 3).map((m: any, idx: number) => (
+                        <div key={idx} className="w-1.5 h-1.5 rounded-full bg-brand-success/30" title={m.label} />
+                      ))}
+                    </div>
+                    <span className="text-[11px] font-black text-brand-success flex items-center gap-0.5">
+                      완성도 {p.analysis.structuringLevel}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-brand-ivory via-brand-ivory to-transparent">
