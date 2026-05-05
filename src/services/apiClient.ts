@@ -10,30 +10,60 @@ export const apiClient = {
       body: JSON.stringify({ oneLineReview }),
     });
     if (!response.ok) throw new Error("Failed to start proposal");
-    return response.json();
+    const data = await response.json();
+    
+    // Map scores to metrics
+    if (data.analysis && data.analysis.scores) {
+      data.analysis.metrics = data.analysis.scores;
+      delete data.analysis.scores;
+    }
+    return data;
   },
 
-  async respondToProposal(id: string, answer: string) {
-    const response = await fetch(`${API_BASE_URL}/api/proposals/${id}/respond`, {
+  async respondToProposal(proposalId: string, answer: string) {
+    const response = await fetch(`${API_BASE_URL}/api/proposals/${proposalId}/respond`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ answer }),
     });
     if (!response.ok) throw new Error("Failed to respond to proposal");
-    return response.json();
+    const data = await response.json();
+
+    // Map scores to metrics
+    if (data.analysis && data.analysis.scores) {
+      data.analysis.metrics = data.analysis.scores;
+      delete data.analysis.scores;
+    }
+    return data;
   },
 
-  async finalizeProposal(id: string) {
-    const response = await fetch(`${API_BASE_URL}/api/proposals/${id}/finalize`, {
+  async finalizeProposal(proposalId: string) {
+    const response = await fetch(`${API_BASE_URL}/api/proposals/${proposalId}/finalize`, {
       method: "POST",
     });
     if (!response.ok) throw new Error("Failed to finalize proposal");
-    return response.json();
+    const data = await response.json();
+    
+    // Map scores to metrics for list consistency
+    if (data.proposal && data.proposal.analysis && data.proposal.analysis.scores) {
+      data.proposal.analysis.metrics = data.proposal.analysis.scores;
+      delete data.proposal.analysis.scores;
+    }
+    return data;
   },
 
   async getProposals() {
     const response = await fetch(`${API_BASE_URL}/api/proposals`);
     if (!response.ok) throw new Error("Failed to fetch proposals");
-    return response.json();
+    const data = await response.json();
+    
+    // Map scores to metrics for all items
+    return data.map((p: any) => {
+      if (p.analysis && p.analysis.scores) {
+        p.analysis.metrics = p.analysis.scores;
+        delete p.analysis.scores;
+      }
+      return p;
+    });
   }
 };

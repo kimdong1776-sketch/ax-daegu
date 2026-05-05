@@ -29,7 +29,7 @@ const analysisSchema = {
       },
       required: ["category", "problem", "target", "direction", "possibility"],
     },
-    metrics: {
+    scores: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
@@ -43,7 +43,7 @@ const analysisSchema = {
       }
     }
   },
-  required: ["structuringLevel", "diagnostic", "riskOfRejection", "draft", "metrics"],
+  required: ["structuringLevel", "diagnostic", "riskOfRejection", "draft", "scores"],
 };
 
 // In-memory storage
@@ -91,7 +91,7 @@ async function startServer() {
          - target: 이 정책의 수혜 대상
          - direction: 해결 방안의 대략적인 방향
          - possibility: 정책화 가능성에 대한 전문가 소견
-      3. metrics: 다음 5개 지표를 포함하세요 (Icon은 'target', 'public', 'library_books', 'build', 'lightbulb' 중 하나)
+      3. scores: 다음 5개 지표를 포함하세요 (Icon은 'target', 'public', 'library_books', 'build', 'lightbulb' 중 하나)
          - 문제 명확도
          - 공공성
          - 근거 충분성
@@ -141,10 +141,10 @@ async function startServer() {
   });
 
   // 2. Refinement Response
-  app.post("/api/proposals/:id/respond", async (req, res) => {
-    const { id } = req.params;
+  app.post("/api/proposals/:proposalId/respond", async (req, res) => {
+    const { proposalId } = req.params;
     const { answer } = req.body;
-    const proposal = proposals[id];
+    const proposal = proposals[proposalId];
 
     if (!proposal) return res.status(404).json({ error: "Proposal not found" });
 
@@ -157,7 +157,7 @@ async function startServer() {
     proposal.analysis = {
       ...proposal.analysis,
       structuringLevel: newScore,
-      metrics: proposal.analysis.metrics.map((m: any) => {
+      scores: proposal.analysis.scores.map((m: any) => {
         const inc = m.value < 90 ? Math.floor(Math.random() * 10) + 3 : 0;
         return {
           ...m,
@@ -197,11 +197,11 @@ async function startServer() {
   });
 
   // 3. Finalize
-  app.post("/api/proposals/:id/finalize", async (req, res) => {
-    const { id } = req.params;
-    if (proposals[id]) {
-      proposals[id].status = 'finalized';
-      res.json({ success: true, proposal: proposals[id] });
+  app.post("/api/proposals/:proposalId/finalize", async (req, res) => {
+    const { proposalId } = req.params;
+    if (proposals[proposalId]) {
+      proposals[proposalId].status = 'finalized';
+      res.json({ success: true, proposal: proposals[proposalId] });
     } else {
       res.status(404).json({ error: "Not found" });
     }
