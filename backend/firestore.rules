@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /proposals/{proposalId} {
+      // For this app, the backend (Admin SDK) handles all writes.
+      // If the user ever wanted to allow client-side reads:
+      allow read: if true; 
+      // Strictly, we should only allow the backend to write, which it does.
+      // But we define rules for best practice as if the client might interact.
+      allow create: if isValidProposal(request.resource.data);
+      allow update: if isValidProposal(request.resource.data) 
+                    && request.resource.data.originalText == resource.data.originalText;
+    }
+
+    function isValidProposal(data) {
+      return data.originalText is string && data.originalText.size() <= 1000
+             && data.currentRound is number
+             && data.isCompleted is bool;
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Proposal": {
+      "title": "Policy Proposal",
+      "description": "A policy proposal translated from a citizen complaint.",
+      "type": "object",
+      "properties": {
+        "originalText": { "type": "string" },
+        "field": { "type": "string" },
+        "coreProblem": { "type": "string" },
+        "affectedGroup": { "type": "string" },
+        "requestDirection": { "type": "string" },
+        "policyFeasibility": { "type": "string" },
+        "supplementPoint": { "type": "string" },
+        "scores": {
+          "type": "object",
+          "properties": {
+            "problemClarity": { "type": "number" },
+            "publicness": { "type": "number" },
+            "evidence": { "type": "number" },
+            "feasibility": { "type": "number" },
+            "alternativeSpecificity": { "type": "number" }
+          }
+        },
+        "feedback": { "type": "string" },
+        "currentRound": { "type": "number" },
+        "counterQuestion": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        },
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "round": { "type": "number" },
+              "answer": { "type": "string" }
+            }
+          }
+        },
+        "isCompleted": { "type": "boolean" },
+        "finalCard": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "summary": { "type": "string" },
+            "problem": { "type": "string" },
+            "suggestion": { "type": "string" },
+            "expectedEffect": { "type": "string" },
+            "reviewPoints": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["originalText", "currentRound", "isCompleted"]
+    }
+  },
+  "firestore": {
+    "proposals": {
+      "schema": "Proposal",
+      "description": "Collection of policy proposals"
+    }
+  }
+}
