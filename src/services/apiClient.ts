@@ -23,7 +23,7 @@ export function convertBackendToAnalysis(data: any): AIAnalysis {
 
   return {
     structuringLevel: safeStructuringLevel,
-    diagnostic: data.feedback ?? "AI가 시민 의견을 정책 제안 형태로 분석했습니다.",
+    diagnostic: data.feedback ?? "시민님의 소중한 의견을 정책 제안서로 다듬어 보았습니다.",
     riskOfRejection: Number(data.scores?.evidence ?? 0) < 5,
     draft: {
       category: data.field ?? "기타",
@@ -37,9 +37,9 @@ export function convertBackendToAnalysis(data: any): AIAnalysis {
 }
 
 export function getCounterQuestionText(counterQuestion: any) {
-  if (!counterQuestion) return "제안을 더 구체화하기 위해 추가 정보를 입력해주세요.";
+  if (!counterQuestion) return "더 멋진 제안서가 될 수 있도록 몇 가지만 더 여쭤볼게요.";
   if (typeof counterQuestion === "string") return counterQuestion;
-  return counterQuestion.message ?? "제안을 더 구체화하기 위해 추가 정보를 입력해주세요.";
+  return counterQuestion.message ?? "더 멋진 제안서가 될 수 있도록 몇 가지만 더 여쭤볼게요.";
 }
 
 export const apiClient = {

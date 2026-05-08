@@ -42,7 +42,7 @@ export function RefineScreen({ proposalId, analysis, messages, setMessages, onUp
       const assistantMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: result.nextCounterQuestion?.message || (result.isReadyToFinalize ? "모든 답변이 완료되었습니다. 제안서를 완성할 수 있습니다." : "추가 의견이 있으신가요?")
+        content: result.nextCounterQuestion?.message || (result.isReadyToFinalize ? "모든 답변이 완료되었습니다! 이제 제안서를 완성할 수 있어요." : "더 보완하고 싶은 내용이 있으신가요?")
       };
 
       const rawMetrics = [
@@ -225,7 +225,7 @@ export function RefineScreen({ proposalId, analysis, messages, setMessages, onUp
               </div>
               
               <span className="text-[10px] text-gray-400 mt-1.5 px-1">
-                {msg.role === "user" ? "나의 보완" : "전문가 피드백"}
+                {msg.role === "user" ? "나의 답변" : "정책 분석관의 조언"}
               </span>
             </motion.div>
           ))}
@@ -261,7 +261,7 @@ export function RefineScreen({ proposalId, analysis, messages, setMessages, onUp
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:ring-1 focus:ring-brand-blue focus:border-brand-blue transition-all resize-none max-h-32"
-            placeholder="질문에 답하며 제안을 보완하세요..."
+            placeholder="생각을 자유롭게 들려주세요..."
             rows={1}
           />
           <button

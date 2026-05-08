@@ -34,10 +34,10 @@ export function ResultScreen({ analysis, onRefine, onSubmit }: ResultScreenProps
       <main className="flex-1 max-w-2xl mx-auto w-full pt-24 pb-48 px-6 flex flex-col gap-8">
         <section className="text-center space-y-2">
           <h2 className="text-3xl font-black leading-tight">
-            시민님의 불편이<br />정책 언어로 번역되었습니다.
+            시민님의 소중한 의견이<br />정책 제안서로 다듬어졌습니다.
           </h2>
           <p className="text-gray-500 text-sm">
-            입력하신 내용을 바탕으로 구조화된 정책 초안을 확인해보세요.
+            입력하신 내용을 바탕으로 분석한 정책 초안을 확인해보세요.
           </p>
         </section>
 
@@ -47,7 +47,7 @@ export function ResultScreen({ analysis, onRefine, onSubmit }: ResultScreenProps
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">정책 분석 결과</span>
-                <h3 className="text-xl font-bold">정책 구조화 수준</h3>
+                <h3 className="text-xl font-bold">정책 구체화 수준</h3>
               </div>
               <span className="text-3xl font-black text-brand-success">{analysis.structuringLevel}%</span>
             </div>
@@ -60,14 +60,14 @@ export function ResultScreen({ analysis, onRefine, onSubmit }: ResultScreenProps
               />
             </div>
             <p className="text-xs text-gray-500">
-              초기 아이디어 단계입니다. AI 검증을 통해 구체적인 근거를 보완하면 완성도를 높일 수 있습니다.
+              시민님의 생각이 정책의 모습을 갖춰가고 있습니다. 대화를 통해 더 멋진 제안서로 완성할 수 있어요!
             </p>
             
             <button 
               onClick={() => setIsExpanded(!isExpanded)}
               className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white border border-brand-orange/40 rounded-full px-4 py-1.5 flex items-center gap-1 shadow-md hover:bg-gray-50 transition-colors"
             >
-              <span className="text-xs font-bold text-brand-orange uppercase">{isExpanded ? "접기" : "펼치기"}</span>
+              <span className="text-xs font-bold text-brand-orange uppercase">{isExpanded ? "접기" : "내용 보기"}</span>
               <ChevronDown size={16} className={`text-brand-orange transition-transform ${isExpanded ? "rotate-180" : ""}`} />
             </button>
           </div>
@@ -120,13 +120,13 @@ export function ResultScreen({ analysis, onRefine, onSubmit }: ResultScreenProps
         </div>
 
         {/* Diagnosis Box */}
-        <div className={`border-2 rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-colors duration-500 ${analysis.structuringLevel < 75 ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-brand-blue/20'}`}>
-          <div className="flex-shrink-0 bg-white rounded-full p-2 shadow-sm border border-red-100">
-            {analysis.structuringLevel < 75 ? <AlertTriangle className="text-red-500" /> : <ShieldCheck className="text-brand-blue" />}
+        <div className={`border-2 rounded-2xl p-6 flex items-start gap-4 shadow-sm transition-colors duration-500 ${analysis.structuringLevel < 75 ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-brand-blue/20'}`}>
+          <div className={`flex-shrink-0 bg-white rounded-full p-2 shadow-sm border ${analysis.structuringLevel < 75 ? 'border-orange-100' : 'border-blue-100'}`}>
+            {analysis.structuringLevel < 75 ? <AlertTriangle className="text-orange-500" /> : <ShieldCheck className="text-brand-blue" />}
           </div>
           <div className="space-y-1">
-            <p className={`font-bold text-sm flex items-center gap-1 ${analysis.structuringLevel < 75 ? 'text-red-900' : 'text-blue-900'}`}>
-              진단 결과: {analysis.structuringLevel < 75 ? '반려 위험' : '통과 가능성 높음'}
+            <p className={`font-bold text-sm flex items-center gap-1 ${analysis.structuringLevel < 75 ? 'text-orange-900' : 'text-blue-900'}`}>
+              진단 결과: {analysis.structuringLevel < 75 ? '성장 가능성 높음' : '완성도 높음'}
             </p>
             <p className="text-sm text-gray-700 leading-relaxed font-medium">
               {analysis.diagnostic}
@@ -141,14 +141,14 @@ export function ResultScreen({ analysis, onRefine, onSubmit }: ResultScreenProps
               onClick={onRefine}
               className="w-full bg-brand-blue text-white font-bold py-4 rounded-2xl shadow-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-all active:scale-95"
             >
-              ⚔️ 이의있소! (빈약한 근거 방어하고 제안 보완하기)
+              이의 있소!! (내 의견 보완하기)
             </button>
             <button
               onClick={onSubmit}
               className="w-full bg-white text-gray-500 border border-gray-200 font-bold py-4 rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
             >
               <FileText size={18} />
-              초안으로 제출 (여기까지만 하고 데이터 기부하기)
+              이대로 제출하기 (시민 의견 기부하기)
             </button>
           </div>
         </div>
