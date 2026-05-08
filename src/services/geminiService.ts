@@ -124,7 +124,7 @@ ${oneLineReview}
 4. scores의 각 항목은 퍼센트 점수입니다.
 5. field, coreProblem, affectedGroup, requestDirection은 반드시 시민 의견과 직접 관련된 내용이어야 합니다.
 6. 입력이 모호하면 임의로 새로운 정책 주제를 만들지 말고, "추가 정보 필요"로 처리하세요.
-7. 공공자전거, CCTV, 보행 안전, 주차 등 시민이 말하지 않은 다른 주제를 새로 만들지 마세요.
+7. 시민이 말하지 않은 다른 주제를 새로 만들지 마세요.
 
 점수 기준:
 - problemClarity: 문제 명확도, 0~100
