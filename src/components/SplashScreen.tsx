@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-export function SplashScreen({ onComplete }: { onComplete: () => void }) {
+export function SplashScreen({ onComplete }: { key?: string; onComplete: () => void }) {
   return (
     <motion.div 
       initial={{ opacity: 1 }}

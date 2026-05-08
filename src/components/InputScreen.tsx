@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { apiClient } from "../services/apiClient";
 
 interface InputScreenProps {
-  onSubmit: (text: string) => void;
+  key?: string;
+  onSubmit: (text: string) => Promise<void> | void;
 }
 
 export function InputScreen({ onSubmit }: InputScreenProps) {
@@ -43,14 +44,9 @@ export function InputScreen({ onSubmit }: InputScreenProps) {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-32 h-32 rounded-full bg-white border border-gray-100 shadow-sm overflow-hidden flex items-center justify-center"
+            className="w-32 h-32 rounded-full bg-white border border-gray-100 shadow-sm flex items-center justify-center overflow-hidden"
           >
-            <img 
-              src="https://images.unsplash.com/photo-1544717305-27a734ef1904?auto=format&fit=crop&q=80&w=200&h=200" 
-              alt="Avatar"
-              className="w-full h-full object-cover opacity-80"
-              referrerPolicy="no-referrer"
-            />
+            <img src="/logo.png" alt="이의있소!" className="w-full h-full object-contain p-2" />
           </motion.div>
           <h2 className="text-3xl font-bold leading-tight">
             대구에서 어떤 점이<br />불편하셨나요?

@@ -4,6 +4,7 @@ import { AIAnalysis } from "../types";
 import { useState } from "react";
 
 interface ResultScreenProps {
+  key?: string;
   analysis: AIAnalysis;
   onRefine: () => void;
   onSubmit: () => void;

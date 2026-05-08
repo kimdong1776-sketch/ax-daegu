@@ -4,6 +4,7 @@ import { Gavel, CheckCircle2, RefreshCcw, TrendingUp, ChevronDown, Target, Globe
 import { AIAnalysis } from "../types";
 
 interface SubmissionCompleteScreenProps {
+  key?: string;
   analysis: AIAnalysis;
   onReset: () => void;
 }

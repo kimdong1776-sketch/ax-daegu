@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from "motion/react";
-import { Screen, AIAnalysis } from './types';
+import { Screen, AIAnalysis, ChatMessage } from './types';
 import { SplashScreen } from './components/SplashScreen';
 import { InputScreen } from './components/InputScreen';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -21,46 +21,18 @@ interface PersistedState {
 }
 
 export default function App() {
-  const getInitialState = (): PersistedState => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.currentScreen === 'LOADING') {
-          return { ...parsed, currentScreen: 'INPUT' };
-        }
-        if (!parsed.messages) parsed.messages = [];
-        return parsed;
-      } catch (e) {
-        console.error("Failed to parse saved state", e);
-      }
-    }
-    return {
-      currentScreen: 'SPLASH',
-      complaint: '',
-      analysis: null,
-      messages: [],
-      proposalId: null,
-    };
+  // Removed localStorage persistence per user request
+  const [currentScreen, setCurrentScreen] = useState<Screen>('SPLASH');
+  const [complaint, setComplaint] = useState('');
+  const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [proposalId, setProposalId] = useState<string | null>(null);
+
+  const handleSplashComplete = () => {
+    setCurrentScreen('INPUT');
   };
 
-  const initialState = getInitialState();
-  const [currentScreen, setCurrentScreen] = useState<Screen>(initialState.currentScreen);
-  const [complaint, setComplaint] = useState(initialState.complaint);
-  const [analysis, setAnalysis] = useState<AIAnalysis | null>(initialState.analysis);
-  const [messages, setMessages] = useState<ChatMessage[]>(initialState.messages);
-  const [proposalId, setProposalId] = useState<string | null>(initialState.proposalId);
-
-  useEffect(() => {
-    const stateToSave: PersistedState = {
-      currentScreen,
-      complaint,
-      analysis,
-      messages,
-      proposalId,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
-  }, [currentScreen, complaint, analysis, messages]);
+  // Removed useEffect for saving to localStorage
 
   const handleStartAnalysis = async (text: string) => {
     setComplaint(text);
@@ -68,7 +40,7 @@ export default function App() {
     
     try {
       const result = await apiClient.startProposal(text);
-      setProposalId(result.id);
+      setProposalId(result.proposalId);
       setAnalysis(result.analysis);
       setMessages([{
         id: "1",
@@ -100,7 +72,7 @@ export default function App() {
     <div className="min-h-screen bg-brand-ivory font-sans antialiased text-brand-navy selection:bg-brand-blue/10">
       <AnimatePresence mode="wait">
         {currentScreen === 'SPLASH' && (
-          <SplashScreen key="splash" onComplete={() => setCurrentScreen('INPUT')} />
+          <SplashScreen key="splash" onComplete={handleSplashComplete} />
         )}
 
         {currentScreen === 'INPUT' && (

@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { Stars, ArrowUp, Target, Globe, Library, Wrench, Lightbulb, ArrowRight } from "lucide-react";
 import { AIAnalysis } from "../types";
 
-export function SuccessScreen({ analysis, onContinue }: { analysis: AIAnalysis, onContinue: () => void }) {
+export function SuccessScreen({ analysis, onContinue }: { key?: string; analysis: AIAnalysis, onContinue: () => void }) {
   const icons: Record<string, any> = {
     target: Target,
     public: Globe,

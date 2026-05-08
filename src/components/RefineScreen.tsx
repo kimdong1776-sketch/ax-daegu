@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Gavel, ChevronLeft, Send, Stars, Target, Globe, Library, Wrench, Lightbulb } from "lucide-react";
 import { AIAnalysis, ChatMessage } from "../types";
@@ -6,6 +6,7 @@ import { apiClient } from "../services/apiClient";
 import { SuccessScreen } from "./SuccessScreen";
 
 interface RefineScreenProps {
+  key?: string;
   proposalId: string;
   analysis: AIAnalysis;
   messages: ChatMessage[];
@@ -41,12 +42,38 @@ export function RefineScreen({ proposalId, analysis, messages, setMessages, onUp
       const assistantMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: result.nextMessage
+        content: result.nextCounterQuestion?.message || (result.isReadyToFinalize ? "모든 답변이 완료되었습니다. 제안서를 완성할 수 있습니다." : "추가 의견이 있으신가요?")
+      };
+
+      const rawMetrics = [
+        { label: "문제 명확도", value: Number(result.updatedScores?.problemClarity ?? 0), icon: "target" as const },
+        { label: "공공성", value: Number(result.updatedScores?.publicness ?? 0), icon: "public" as const },
+        { label: "근거 충분성", value: Number(result.updatedScores?.evidence ?? 0), icon: "library_books" as const },
+        { label: "실현 가능성", value: Number(result.updatedScores?.feasibility ?? 0), icon: "build" as const },
+        { label: "대안 구체성", value: Number(result.updatedScores?.alternativeSpecificity ?? 0), icon: "lightbulb" as const },
+      ];
+
+      const structuringLevelCalc = Math.round(
+        rawMetrics.reduce((sum, metric) => sum + metric.value, 0) / (rawMetrics.length || 1)
+      );
+      const newStructuringLevel = Math.max(0, Math.min(100, structuringLevelCalc));
+
+      const oldMetricsMap = Object.fromEntries(analysis.metrics.map(m => [m.label, m.value]));
+
+      const newAnalysis: AIAnalysis = {
+        ...analysis,
+        structuringLevel: newStructuringLevel,
+        diagnostic: result.feedback || "제안이 더욱 구체화되었습니다.",
+        riskOfRejection: Number(result.updatedScores?.evidence ?? 0) < 5,
+        metrics: rawMetrics.map(m => ({
+            ...m,
+            increment: m.value - (oldMetricsMap[m.label] ?? 0)
+        }))
       };
 
       // 2. Update all states
       setMessages(prev => [...prev, assistantMsg]);
-      onUpdate(result.analysis);
+      onUpdate({ ...analysis, ...newAnalysis });
       setIsTyping(false);
       
       // 3. Show progress/growth modal after a short delay
@@ -227,32 +254,7 @@ export function RefineScreen({ proposalId, analysis, messages, setMessages, onUp
           )}
         </AnimatePresence>
 
-        {/* Submit Policy Button (Appears when score is high) */}
-        <AnimatePresence>
-          {analysis.structuringLevel >= 85 && (
-            <motion.div 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
-              className="absolute -top-16 left-0 right-0 flex justify-center pointer-events-none"
-            >
-              <button 
-                onClick={async () => {
-                  try {
-                    await apiClient.finalizeProposal(proposalId);
-                    onComplete();
-                  } catch (e) {
-                    console.error(e);
-                  }
-                }}
-                className="pointer-events-auto bg-brand-orange text-white px-6 py-2.5 rounded-full font-black text-sm shadow-xl flex items-center gap-2 hover:bg-orange-600 transition-all active:scale-95 border-b-4 border-orange-800"
-              >
-                <Stars size={18} />
-                최종 정책 제안서 완성하기
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Removed final policy proposal button section per user request */}
 
         <div className="max-w-2xl mx-auto flex items-end gap-2">
           <textarea
